@@ -1,0 +1,6 @@
+PROGRAM
+BEGIN
+ VAR a,b;
+ a:=356;
+ b:='c';
+END
