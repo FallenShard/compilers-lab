@@ -17,7 +17,7 @@
 %column
 
 // %debug enables output of all tokens, %standalone only unknown tokens
-%standalone
+%debug
 
 // Code that gets added to the class (MPLexer class)
 %{

@@ -13,6 +13,8 @@ main()
     x = 123;
     y = $FF9AB12;
     prom = 0.5E10;
+
+    
     
     while((programDone != false) || (fileRead && y > x))
     {
@@ -21,4 +23,6 @@ main()
         y = y - w * x;
         a = y / prom - x;
     }
+
+    // This is where the loop ends
 }

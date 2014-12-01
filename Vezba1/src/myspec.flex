@@ -17,7 +17,7 @@
 %column
 
 // %debug enables output of all tokens, %standalone only unknown tokens
-%standalone
+%debug
 
 // Code that gets added to the class (MyLexer class)
 %{
@@ -37,8 +37,8 @@
     return new MyToken( MySym.EOF, null, yyline, yycolumn);
 %eofval}
 
-// This directive adds initial states to the state machine
-%state  COMMENT
+// This directive adds "//comment" state to the state machine
+%x  COMMENT
 
 // Macros can be defined to be added in-place where they are needed
 letter = [a-zA-Z]
@@ -51,7 +51,8 @@ hexDigit = [0-9a-fA-F]
 // Commented sections
 \/\/            { yybegin( COMMENT ); }
 <COMMENT>\n     { yybegin( YYINITIAL ); }
-// NOT USED <COMMENT>.   { ; }
+<COMMENT>.      { ; }
+
 [\t\n\r ]       { ; }
 
 // Separators
