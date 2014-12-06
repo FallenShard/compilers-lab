@@ -66,8 +66,8 @@ hexDigit = [0-9a-fA-F]
 ,       { return new MyToken(MySym.COMMA,       yytext(), yyline, yycolumn); }
 
 // Bool values
-true    { return new MyToken(MySym.TRUE,        yytext(), yyline, yycolumn); }
-false   { return new MyToken(MySym.FALSE,       yytext(), yyline, yycolumn); }
+true    { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
+false   { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
 
 // Arithmetic operators
 \+      { return new MyToken(MySym.ADD,   yytext(), yyline, yycolumn); }
@@ -91,7 +91,7 @@ false   { return new MyToken(MySym.FALSE,       yytext(), yyline, yycolumn); }
 {letter}+    { return getKeyword(); }
 
 // Identifiers
-{letter}({letter}|{digit}|_)*   { return new MyToken(MySym.ID, yytext(),yyline, yycolumn); }
+({letter}|_)({letter}|{digit}|_)*   { return new MyToken(MySym.ID, yytext(),yyline, yycolumn); }
 
 // Constants
 \${hexDigit}+                   { return new MyToken(MySym.CONST, yytext(), yyline, yycolumn); }
