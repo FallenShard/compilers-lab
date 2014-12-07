@@ -9,12 +9,23 @@
  */
 public class MySym
 {
+    // Part of the grammar, lab 2
+    public static final int WHILE = 0;
+    public static final int LPAR = 1;
+    public static final int ID = 2;
+    public static final int RPAR = 3;
+    public static final int ASSIGN = 4;
+    public static final int SEMICOLON = 5;
+    public static final int PLUS = 6;
+    public static final int CONST = 7;
+    public static final int EOF = 8;
+    
     // EOF
-    public final static int EOF = 0;
+    //public final static int EOF = 0;
     
     // KEY WORDS
     // Reserved functions
-	public final static int MAIN = 1;
+	public final static int MAIN = 10;
     public final static int READ = 20;
 	public final static int WRITE = 21;
     
@@ -24,14 +35,14 @@ public class MySym
     public final static int RBPAR = 51;
     
     // Expression separators
-	public final static int LPAR = 52;
-	public final static int RPAR = 53;
+	//public final static int LPAR = 52;
+	//public final static int RPAR = 53;
     
     // Expression assignment
-	public final static int ASSIGN = 60;
+	//public final static int ASSIGN = 60;
     
     // Statement separator
-	public final static int SEMICOLON = 61;
+	//public final static int SEMICOLON = 61;
     
     // Type declaration separator
     public final static int COLON = 62;
@@ -40,8 +51,8 @@ public class MySym
 	public final static int COMMA = 63;
 
     // Other keywords
-    public final static int ID    = 100;
-    public final static int CONST = 101;
+    //public final static int ID    = 100;
+    //public final static int CONST = 101;
     
     // Special values (bool)
     public final static int TRUE  = 110;
@@ -54,13 +65,13 @@ public class MySym
 	public final static int BOOL = 203;
     
     // Block control
-    public final static int WHILE = 220;
+    //public final static int WHILE = 220;
 	
     // Arithmetic operators
-    public final static int ADD = 300;
-    public final static int SUB = 301;
-    public final static int MUL = 302;
-    public final static int DIV = 303;
+    //public final static int PLUS = 300;
+    public final static int MINUS = 301;
+    public final static int ASTER = 302;
+    public final static int FSLASH = 303;
     
     // Relational operators
     public final static int LT  = 350;

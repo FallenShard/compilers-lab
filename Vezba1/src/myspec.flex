@@ -70,10 +70,10 @@ true    { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
 false   { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
 
 // Arithmetic operators
-\+      { return new MyToken(MySym.ADD,   yytext(), yyline, yycolumn); }
-\-      { return new MyToken(MySym.SUB,   yytext(), yyline, yycolumn); }
-\*      { return new MyToken(MySym.MUL,   yytext(), yyline, yycolumn); }
-\/      { return new MyToken(MySym.DIV,   yytext(), yyline, yycolumn); }
+\+      { return new MyToken(MySym.PLUS,   yytext(), yyline, yycolumn); }
+\-      { return new MyToken(MySym.MINUS,   yytext(), yyline, yycolumn); }
+\*      { return new MyToken(MySym.ASTER,   yytext(), yyline, yycolumn); }
+\/      { return new MyToken(MySym.FSLASH,   yytext(), yyline, yycolumn); }
 
 // Logical operators
 &&      { return new MyToken(MySym.AND,   yytext(), yyline, yycolumn); }
