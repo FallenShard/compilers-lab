@@ -42,7 +42,7 @@ public class LRParser
         {
             for (int i = 0; i < argv.length; i++)
             {
-                MyLexer scanner = null;
+                MyLexer scanner;
                 try
                 {
                   scanner = new MyLexer( new java.io.FileReader(argv[i]) );
