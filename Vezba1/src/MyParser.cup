@@ -1,0 +1,61 @@
+//import section
+
+import java_cup.runtime.*;
+import java.io.*;
+
+parser code {:
+   public static void main( String[] args )
+   {
+      try
+	  {
+		   FileReader file = new FileReader( args[0] );
+		   Scanner scanner = new MyLexer( file );
+		   MyParser parser = new MyParser( scanner );
+		   parser.parse();
+	  }
+	  catch( Exception e )
+	  {
+		   System.out.println(e);
+	  }
+   }
+:};
+
+
+// Terminal symbols
+terminal WHILE, LPAR, ID, RPAR, ASSIGN, SEMICOLON, PLUS, CONST;
+
+// Nonterminal symbols
+non terminal WhileStatement, Statement, Assignment, Expression;
+
+
+
+
+// Grammar
+
+WhileStatement ::= WHILE LPAR ID RPAR Statement 
+                   {:
+                      System.out.println("\u001B[32m" + "Redukcija po smeni 1.");
+                   :};
+
+Statement ::= WhileStatement
+              {:
+                System.out.println("\u001B[32m" + "Redukcija po smeni 2.");
+              :}
+            | Assignment
+              {:
+                System.out.println("\u001B[32m" + "Redukcija po smeni 3.");
+              :};
+
+Assignment ::= ID ASSIGN Expression SEMICOLON 
+               {:
+                System.out.println("\u001B[32m" + "Redukcija po smeni 4." );
+               :};
+
+Expression ::= Expression PLUS CONST
+               {:
+                System.out.println("\u001B[32m" + "Redukcija po smeni 5." );
+               :}
+             | CONST
+               {:
+                System.out.println("\u001B[32m" + "Redukcija po smeni 6." );
+               :};
