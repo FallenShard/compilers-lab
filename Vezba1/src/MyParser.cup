@@ -4,6 +4,9 @@ import java_cup.runtime.*;
 import java.io.*;
 
 parser code {:
+
+    public int errNo = 0;
+
    public static void main( String[] args )
    {
       try
@@ -12,11 +15,31 @@ parser code {:
 		   Scanner scanner = new MyLexer( file );
 		   MyParser parser = new MyParser( scanner );
 		   parser.parse();
+           
+           if ( parser.errNo == 0 )
+		      System.out.println("\u001B[32m" + "Analiza zavrsena. U kodu nema gresaka." );
+		   else
+		      System.out.println("\u001B[31m" + "Analiza zavrsena. Broj gresaka: " + parser.errNo );
 	  }
 	  catch( Exception e )
 	  {
 		   System.out.println(e);
 	  }
+   }
+   
+   public void syntax_error(Symbol cur_token)
+   {
+   	  
+   }
+   
+   public void report_error(String message, Object info)
+   {
+   	   System.out.print("\u001B[31m" + message );
+   }
+   
+   public int getLine()
+   {
+   	  return ((MyLexer) getScanner()).getLine();
    }
 :};
 
@@ -34,28 +57,28 @@ non terminal WhileStatement, Statement, Assignment, Expression;
 
 WhileStatement ::= WHILE LPAR ID RPAR Statement 
                    {:
-                      System.out.println("\u001B[32m" + "Redukcija po smeni 1.");
+                      System.out.println("\u001B[34m" + "Redukcija po smeni 1.");
                    :};
 
 Statement ::= WhileStatement
               {:
-                System.out.println("\u001B[32m" + "Redukcija po smeni 2.");
+                System.out.println("\u001B[34m" + "Redukcija po smeni 2.");
               :}
             | Assignment
               {:
-                System.out.println("\u001B[32m" + "Redukcija po smeni 3.");
+                System.out.println("\u001B[34m" + "Redukcija po smeni 3.");
               :};
 
 Assignment ::= ID ASSIGN Expression SEMICOLON 
                {:
-                System.out.println("\u001B[32m" + "Redukcija po smeni 4." );
+                System.out.println("\u001B[34m" + "Redukcija po smeni 4." );
                :};
 
 Expression ::= Expression PLUS CONST
                {:
-                System.out.println("\u001B[32m" + "Redukcija po smeni 5." );
+                System.out.println("\u001B[34m" + "Redukcija po smeni 5." );
                :}
              | CONST
                {:
-                System.out.println("\u001B[32m" + "Redukcija po smeni 6." );
+                System.out.println("\u001B[34m" + "Redukcija po smeni 6." );
                :};

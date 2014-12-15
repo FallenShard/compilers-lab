@@ -1,2 +1,3 @@
 while (hasStuff)
-    doStuff = 5 + 3;
+    while (what)
+    doStuff = 5 + 3 + 5;

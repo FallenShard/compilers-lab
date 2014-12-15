@@ -8,9 +8,10 @@ import java_cup.runtime.*;
 %class      MyLexer
 
 // Function name for token extraction function, with %type return type
-%implements java_cup.runtime.Scanner
-%function   next_token
-%type       java_cup.runtime.Symbol
+// %implements java_cup.runtime.Scanner
+// %function   next_token
+// %type       java_cup.runtime.Symbol
+%cup
 
 // %line directive enables line counting (yyline variable)
 %line
@@ -20,8 +21,15 @@ import java_cup.runtime.*;
 
 %eofval{
     // Once end-of-file kicks in, this is the code to call
-    return new Symbol( MySym.EOF);
+    return new Symbol(sym.EOF);
 %eofval}
+
+%{
+   public int getLine()
+   {
+      return yyline;
+   }
+%}
 
 // This directive adds "//comment" state to the state machine
 %x  COMMENT
@@ -56,7 +64,7 @@ true    { return new Symbol(sym.CONST); }
 false   { return new Symbol(sym.CONST); }
 
 // Arithmetic operators
-\+      { return new Symbol(MySym.PLUS); }
+\+      { return new Symbol(sym.PLUS); }
 \-      { return new Symbol(MySym.MINUS); }
 \*      { return new Symbol(MySym.ASTER); }
 \/      { return new Symbol(MySym.FSLASH); }
