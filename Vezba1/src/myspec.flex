@@ -11,6 +11,8 @@ import java_cup.runtime.*;
 // %implements java_cup.runtime.Scanner
 // %function   next_token
 // %type       java_cup.runtime.Symbol
+
+// CUP compatibility setting
 %cup
 
 // %line directive enables line counting (yyline variable)
