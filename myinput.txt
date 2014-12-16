@@ -1,0 +1,18 @@
+main()
+{
+    a : real; 
+    b : int;
+    control : bool;
+    ax : bool;
+    ax = true;
+
+    a = 5;
+
+    b = 3;
+
+    read(a);
+    write(b);
+
+    while ((control != true) && ax)
+        a = a + b;
+}
