@@ -52,14 +52,14 @@ hexDigit = [0-9a-fA-F]
 [\t\n\r ]       { ; }
 
 // Separators
-\{      { return new Symbol(MySym.LBPAR); }
-\}      { return new Symbol(MySym.RBPAR); }
+\{      { return new Symbol(sym.LBPAR); }
+\}      { return new Symbol(sym.RBPAR); }
 \(      { return new Symbol(sym.LPAR); }
 \)      { return new Symbol(sym.RPAR); }
 =       { return new Symbol(sym.ASSIGN); }
 ;       { return new Symbol(sym.SEMICOLON); }
-:       { return new Symbol(MySym.COLON); }
-,       { return new Symbol(MySym.COMMA); }
+:       { return new Symbol(sym.COLON); }
+,       { return new Symbol(sym.COMMA); }
 
 // Bool values
 true    { return new Symbol(sym.CONST); }
@@ -67,24 +67,32 @@ false   { return new Symbol(sym.CONST); }
 
 // Arithmetic operators
 \+      { return new Symbol(sym.PLUS); }
-\-      { return new Symbol(MySym.MINUS); }
-\*      { return new Symbol(MySym.ASTER); }
-\/      { return new Symbol(MySym.FSLASH); }
+\-      { return new Symbol(sym.MINUS); }
+\*      { return new Symbol(sym.ASTER); }
+\/      { return new Symbol(sym.FSLASH); }
 
 // Logical operators
-&&      { return new Symbol(MySym.AND); }
-\|\|    { return new Symbol(MySym.OR); }
+&&      { return new Symbol(sym.AND); }
+\|\|    { return new Symbol(sym.OR); }
 
 // Relational operators
-\<       { return new Symbol(MySym.LT); }
-\<=      { return new Symbol(MySym.LTE); }
-==       { return new Symbol(MySym.EQ); }
-\!=      { return new Symbol(MySym.NEQ); }
-\>       { return new Symbol(MySym.GT); }
-\>=      { return new Symbol(MySym.GTE); }
+\<       { return new Symbol(sym.LT); }
+\<=      { return new Symbol(sym.LTE); }
+==       { return new Symbol(sym.EQ); }
+\!=      { return new Symbol(sym.NEQ); }
+\>       { return new Symbol(sym.GT); }
+\>=      { return new Symbol(sym.GTE); }
 
 // Key words
+"main"  { return new Symbol(sym.MAIN); }
+"int"  { return new Symbol(sym.INT); }
+"char"  { return new Symbol(sym.CHAR); }
+"real"  { return new Symbol(sym.REAL); }
+"bool"  { return new Symbol(sym.BOOL); }
+"read"  { return new Symbol(sym.READ); }
+"write"  { return new Symbol(sym.WRITE); }
 "while"  { return new Symbol(sym.WHILE); }
+
 
 // Identifiers
 ({letter}|_)({letter}|{digit}|_)*   { return new Symbol(sym.ID); }

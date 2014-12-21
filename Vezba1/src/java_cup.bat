@@ -1,7 +1,7 @@
 @echo off
 REM ********   PODESAVANJA - MENJA STUDENT *********
-set JCUP_HOME="D:\Programs\java_cup_v10k"
-set JAVA_HOME="D:\Programs\Java\jdk1.8.0_25"
+set JCUP_HOME="D:\java_cup_v10k"
+set JAVA_HOME="C:\Program Files (x86)\Java\jdk1.7.0_40"
 set PARSER_CLASS_NAME="MyParser"
 set CUP_SPEC_NAME="MyParser.cup"
 

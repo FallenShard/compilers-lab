@@ -261,7 +261,7 @@ class MyLexer implements java_cup.runtime.Scanner {
   /* user code: */
    public int getLine()
    {
-      return yycolumn;
+      return yyline;
    }
 
 
