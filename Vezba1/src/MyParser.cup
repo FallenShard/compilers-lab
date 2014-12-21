@@ -45,10 +45,12 @@ parser code {:
 
 
 // Terminal symbols
-terminal WHILE, LPAR, ID, RPAR, ASSIGN, SEMICOLON, PLUS, CONST, MAIN, READ, WRITE, LBPAR, RBPAR, COLON, COMMA, INT, CHAR, REAL, BOOL, MINUS, ASTER, FSLASH, LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
+terminal WHILE, LPAR, ID, RPAR, ASSIGN, SEMICOLON, PLUS, CONST, MAIN, READ, WRITE, LBPAR, RBPAR, 
+COLON, COMMA, INT, CHAR, REAL, BOOL, MINUS, ASTER, FSLASH, LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
 
 // Nonterminal symbols
-non terminal Program, Block, VarList, VarDecl, NameList, Type, StatementList, Statement, Loop, Expression, AndExpression, RelExpression, RelOp, ArExpression, Term, Factor, ExpressionList;
+non terminal Program, Block, VarList, VarDecl, NameList, Type, StatementList, Statement, 
+Loop, Expression, AndExpression, RelExpression, RelOp, ArExpression, Term, Factor, ExpressionList;
 
 
 
