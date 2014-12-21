@@ -1,0 +1,2 @@
+while (hasStuff)
+    x = 5;
