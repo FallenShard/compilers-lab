@@ -1,4 +1,5 @@
 // USER CODE AND IMPORT SECTION
+import java_cup.runtime.*;
 
 %%
 // OPTIONS AND DECLARATIONS SECTIONS
@@ -7,8 +8,12 @@
 %class      MyLexer
 
 // Function name for token extraction function, with %type return type
-%function   nextToken
-%type       MyToken
+// %implements java_cup.runtime.Scanner
+// %function   next_token
+// %type       java_cup.runtime.Symbol
+
+// CUP compatibility setting
+%cup
 
 // %line directive enables line counting (yyline variable)
 %line
@@ -16,26 +21,17 @@
 // %column directive enables char counter in current line (yycolumn)
 %column
 
-// %debug enables output of all tokens, %standalone only unknown tokens
-%debug
-
-// Code that gets added to the class (MyLexer class)
-%{
-    // Add the keyword tables
-    MyTable myTable = new MyTable();
-
-    // Add a method to access the keyword
-    MyToken getKeyword()
-    {
-        return new MyToken( myTable.find( yytext() ),
-        yytext(), yyline, yycolumn );
-    }
-%}
-
 %eofval{
     // Once end-of-file kicks in, this is the code to call
-    return new MyToken( MySym.EOF, null, yyline, yycolumn);
+    return new Symbol(sym.EOF);
 %eofval}
+
+%{
+   public int getLine()
+   {
+      return yyline;
+   }
+%}
 
 // This directive adds "//comment" state to the state machine
 %x  COMMENT
@@ -56,48 +52,56 @@ hexDigit = [0-9a-fA-F]
 [\t\n\r ]       { ; }
 
 // Separators
-\{      { return new MyToken(MySym.LBPAR,       yytext(), yyline, yycolumn); }
-\}      { return new MyToken(MySym.RBPAR,       yytext(), yyline, yycolumn); }
-\(      { return new MyToken(MySym.LPAR,        yytext(), yyline, yycolumn); }
-\)      { return new MyToken(MySym.RPAR,        yytext(), yyline, yycolumn); }
-=       { return new MyToken(MySym.ASSIGN,      yytext(), yyline, yycolumn); }
-;       { return new MyToken(MySym.SEMICOLON,   yytext(), yyline, yycolumn); }
-:       { return new MyToken(MySym.COLON,       yytext(), yyline, yycolumn); }
-,       { return new MyToken(MySym.COMMA,       yytext(), yyline, yycolumn); }
+\{      { return new Symbol(sym.LBPAR); }
+\}      { return new Symbol(sym.RBPAR); }
+\(      { return new Symbol(sym.LPAR); }
+\)      { return new Symbol(sym.RPAR); }
+=       { return new Symbol(sym.ASSIGN); }
+;       { return new Symbol(sym.SEMICOLON); }
+:       { return new Symbol(sym.COLON); }
+,       { return new Symbol(sym.COMMA); }
 
 // Bool values
-true    { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
-false   { return new MyToken(MySym.CONST,       yytext(), yyline, yycolumn); }
+true    { return new Symbol(sym.CONST); }
+false   { return new Symbol(sym.CONST); }
 
 // Arithmetic operators
-\+      { return new MyToken(MySym.PLUS,   yytext(), yyline, yycolumn); }
-\-      { return new MyToken(MySym.MINUS,   yytext(), yyline, yycolumn); }
-\*      { return new MyToken(MySym.ASTER,   yytext(), yyline, yycolumn); }
-\/      { return new MyToken(MySym.FSLASH,   yytext(), yyline, yycolumn); }
+\+      { return new Symbol(sym.PLUS); }
+\-      { return new Symbol(sym.MINUS); }
+\*      { return new Symbol(sym.ASTER); }
+\/      { return new Symbol(sym.FSLASH); }
 
 // Logical operators
-&&      { return new MyToken(MySym.AND,   yytext(), yyline, yycolumn); }
-\|\|    { return new MyToken(MySym.OR,    yytext(), yyline, yycolumn); }
+&&      { return new Symbol(sym.AND); }
+\|\|    { return new Symbol(sym.OR); }
 
 // Relational operators
-\<       { return new MyToken(MySym.LT,  yytext(), yyline, yycolumn); }
-\<=      { return new MyToken(MySym.LTE, yytext(), yyline, yycolumn); }
-==       { return new MyToken(MySym.EQ,  yytext(), yyline, yycolumn); }
-\!=      { return new MyToken(MySym.NEQ, yytext(), yyline, yycolumn); }
-\>       { return new MyToken(MySym.GT,  yytext(), yyline, yycolumn); }
-\>=      { return new MyToken(MySym.GTE, yytext(), yyline, yycolumn); }
+\<       { return new Symbol(sym.LT); }
+\<=      { return new Symbol(sym.LTE); }
+==       { return new Symbol(sym.EQ); }
+\!=      { return new Symbol(sym.NEQ); }
+\>       { return new Symbol(sym.GT); }
+\>=      { return new Symbol(sym.GTE); }
 
 // Key words
-{letter}+    { return getKeyword(); }
+"main"  { return new Symbol(sym.MAIN); }
+"int"  { return new Symbol(sym.INT); }
+"char"  { return new Symbol(sym.CHAR); }
+"real"  { return new Symbol(sym.REAL); }
+"bool"  { return new Symbol(sym.BOOL); }
+"read"  { return new Symbol(sym.READ); }
+"write"  { return new Symbol(sym.WRITE); }
+"while"  { return new Symbol(sym.WHILE); }
+
 
 // Identifiers
-({letter}|_)({letter}|{digit}|_)*   { return new MyToken(MySym.ID, yytext(),yyline, yycolumn); }
+({letter}|_)({letter}|{digit}|_)*   { return new Symbol(sym.ID); }
 
 // Constants
-\${hexDigit}+                   { return new MyToken(MySym.CONST, yytext(), yyline, yycolumn); }
-{digit}+                        { return new MyToken(MySym.CONST, yytext(), yyline, yycolumn); }
-'[^]'                           { return new MyToken(MySym.CONST, yytext(), yyline, yycolumn); }
-0\.{digit}+(E[\+\-]?{digit}+)?  { return new MyToken(MySym.CONST, yytext(), yyline, yycolumn); }
+\${hexDigit}+                   { return new Symbol(sym.CONST); }
+{digit}+                        { return new Symbol(sym.CONST); }
+'[^]'                           { return new Symbol(sym.CONST); }
+0\.{digit}+(E[\+\-]?{digit}+)?  { return new Symbol(sym.CONST); }
 
 // Error symbol
 .                               { if (yytext() != null && yytext().length() > 0) 
