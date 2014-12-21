@@ -56,318 +56,156 @@ non terminal Program, Block, VarList, VarDecl, NameList, Type, StatementList, St
 // Grammar
 
 Program ::= MAIN LPAR RPAR Block
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 1");
-		    :}
-			| MAIN LPAR RPAR error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing block");
-			  parser.errNo++;
-		    :};
-
-Block ::= LBPAR VarList StatementList RBPAR
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 2");
-		    :}
-//			| LBPAR VarList StatementList error
-//			{:
-//			  System.out.println(parser.getErrorLine() + "Did you forget the closing bracket?");
-//			  parser.errNo++;
-//			:}
-			;	
-			
-			
-			
+          | MAIN LPAR RPAR error
+          {:
+            System.out.println(parser.getErrorLine() + "Missing block");
+            parser.errNo++;
+          :};
+     
+Block ::= LBPAR VarList StatementList RBPAR;        
+              
 VarList ::= VarList VarDecl
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 3");
-		    :}
-		   | VarList error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing variable declaration");
-			  parser.errNo++;
-		    :}
-		  | VarDecl
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 4");
-		    :}
-		 | error
-			{:
-			  System.out.println(parser.getErrorLine() + "Invalid variable declaration");
-			  parser.errNo++;
-		    :};
-			
-			
-			
+          | VarList error
+          {:
+            System.out.println(parser.getErrorLine() + "Missing variable declaration");
+            parser.errNo++;
+          :}
+          | VarDecl
+          | error
+          {:
+            System.out.println(parser.getErrorLine() + "Invalid variable declaration");
+            parser.errNo++;
+          :};
+    
 VarDecl ::= NameList COLON Type SEMICOLON
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 3");
-		    :}
-			| NameList COLON Type error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing semicolon");
-			  parser.errNo++;
-		    :}
-			| NameList error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing colon");
-			  parser.errNo++;
-		    :}
-			;
-			
+          | NameList COLON Type error
+          {:
+            System.out.println(parser.getErrorLine() + "Missing semicolon");
+            parser.errNo++;
+          :}
+          | NameList error
+          {:
+            System.out.println(parser.getErrorLine() + "Missing colon");
+            parser.errNo++;
+          :};
+            
 NameList ::= NameList COMMA ID
-			 {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 5");
-		    :}
-		  | ID
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 6");
-		    :}
-			| NameList COMMA error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing id after comma");
-			  parser.errNo++;
-		    :}
-			;
-			
-Type ::=   INT
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 7");
-		    :}
-		  | CHAR
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 8");
-		    :}
-		  | REAL
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 9");
-		    :}
-		  | BOOL
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 10");
-		    :}
-		| error
-		{:
-		  System.out.println(parser.getErrorLine() + "Invalid type declaration");
-		  parser.errNo++;
-		:};
-			
+           | NameList COMMA error
+           {:
+             System.out.println(parser.getErrorLine() + "Missing id after comma");
+             parser.errNo++;
+           :}
+           | ID;
+            
+Type ::= INT
+       | CHAR
+       | REAL       
+       | BOOL
+       | error
+       {:
+         System.out.println(parser.getErrorLine() + "Invalid type declaration");
+         parser.errNo++;
+       :};
+            
 StatementList ::= StatementList Statement
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 11");
-				:}
-			  | Statement
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 12");
-				:};
-				
+                | Statement;
+                
 Statement ::= Loop
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 13");
-				:}
-			  | ID ASSIGN Expression SEMICOLON
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 14");
-				:}
-			  | ID ASSIGN Expression error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing semicolon at assignment");
-				  parser.errNo++;
-				:}
-				| ID ASSIGN  error
-				{:
-				  System.out.println(parser.getErrorLine() + "Invalid statement");
-				  parser.errNo++;
-				:}
-			  | READ LPAR NameList RPAR SEMICOLON
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 15");
-				:}
-			  | READ LPAR NameList RPAR error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing semicolon");
-				  parser.errNo++;
-				:}
-			  | READ LPAR NameList error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing closing bracket on read");
-				  parser.errNo++;
-				:}
-			  | READ error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing opening bracket on read");
-				  parser.errNo++;
-				:}
-			  | WRITE LPAR ExpressionList RPAR SEMICOLON
-				{:
-				  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 16");
-				:}
-			  | WRITE LPAR ExpressionList RPAR error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing semicolon");
-				  parser.errNo++;
-				:}
-			  | WRITE LPAR ExpressionList error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing closing bracket on write");
-				  parser.errNo++;
-				:}
-			  | WRITE error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing opening bracket on write");
-				  parser.errNo++;
-				:}
-			  | Block
-			    {:
-			      System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 17");
-				:};
-				
+            | ID ASSIGN Expression SEMICOLON
+            | ID ASSIGN Expression error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing semicolon at assignment");
+              parser.errNo++;
+            :}
+            ID ASSIGN  error
+            {:
+              System.out.println(parser.getErrorLine() + "Invalid statement");
+              parser.errNo++;
+            :}
+            | READ LPAR NameList RPAR SEMICOLON
+            | READ LPAR NameList RPAR error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing semicolon");
+              parser.errNo++;
+            :}
+            | READ LPAR NameList error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing closing bracket on read");
+              parser.errNo++;
+            :}
+            | READ error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing opening bracket on read");
+              parser.errNo++;
+            :}
+            | WRITE LPAR ExpressionList RPAR SEMICOLON
+            | WRITE LPAR ExpressionList RPAR error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing semicolon");
+              parser.errNo++;
+            :}
+            | WRITE LPAR ExpressionList error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing closing bracket on write");
+              parser.errNo++;
+            :}
+            | WRITE error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing opening bracket on write");
+              parser.errNo++;
+            :}
+            | Block;
+                
 Loop ::= WHILE LPAR Expression RPAR Statement
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 18");
-			:}
-			| WHILE LPAR Expression error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
-				  parser.errNo++;
-				:}
-			| WHILE error
-				{:
-				  System.out.println(parser.getErrorLine() + "Missing parenthesis before expression");
-				  parser.errNo++;
-				:}
-			;
-			
+       | WHILE LPAR Expression error
+       {:
+         System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
+         parser.errNo++;
+       :}
+       | WHILE error
+       {:
+         System.out.println(parser.getErrorLine() + "Missing parenthesis before expression");
+         parser.errNo++;
+       :};
+            
 Expression ::= Expression OR AndExpression
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 19");
-			:}
-//			| Expression error
-//			{:
-//			  System.out.println(parser.getErrorLine() + "Invalid or operator");
-//			  parser.errNo++;
-//			:}
-		  | AndExpression
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 20");
-			:};
-			
+             | AndExpression;
+            
 AndExpression ::= AndExpression AND RelExpression
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 21");
-			:}
-//			| AndExpression error
-//			{:
-//			  System.out.println(parser.getErrorLine() + "Invalid and operator");
-//			  parser.errNo++;
-//			:}
-		  | RelExpression
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 22");
-			:};
+                | RelExpression;
 
 RelExpression ::= ArExpression RelOp ArExpression
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 23");
-			:}
-		  | ArExpression
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 24");
-			:}
-//			| ArExpression RelOp
-//			{:
-//			  System.out.println(parser.getErrorLine() + "Invalid relational operator");
-//			  parser.errNo++;
-//			:}
-			;
+                | ArExpression;
 
 RelOp ::= LT
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 25");
-			:}
-			| LTE
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 26");
-			:}
-			| EQ
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 27");
-			:}
-			| NEQ
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 28");
-			:}
-			| GT
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 29");
-			:}
-			| GTE
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 30");
-			:}
-//			| error
-//			{:
-//			  System.out.println(parser.getErrorLine() + "Invalid relational operator");
-//			  parser.errNo++;
-//			:}
-			;
-		
+        | LTE
+        | EQ
+        | NEQ
+        | GT
+        | GTE;
+        
 ArExpression ::= ArExpression PLUS Term
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 31");
-			:}
-		  | ArExpression MINUS Term
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 31");
-			:}
-		  | Term
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 32");
-			:};
-			
+               | ArExpression MINUS Term
+               | Term;
+            
 Term ::= Term ASTER Factor
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 33");
-			:}
-		  | Term FSLASH Factor
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 34");
-			:}
-		  | Factor
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 35");
-			:};
-			
+       | Term FSLASH Factor
+       | Factor;
+            
 Factor ::= ID 
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 36");
-			:}
-		  | CONST
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 37");
-			:}
-		  | LPAR Expression RPAR
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 37");
-			:}
-		| LPAR Expression error
-			{:
-			  System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
-			  parser.errNo++;
-			:}
-		| error
-			{:
-			  System.out.println(parser.getErrorLine() + "Unknown factor statement");
-			  parser.errNo++;
-			:}
-			;
+         | CONST
+         | LPAR Expression RPAR
+         | LPAR Expression error
+         {:
+           System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
+           parser.errNo++;
+         :}
+         | error
+         {:
+           System.out.println(parser.getErrorLine() + "Unknown factor statement");
+           parser.errNo++;
+         :};
 
 ExpressionList ::= ExpressionList COMMA Expression 
-			{:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 38");
-			:}
-		  | Expression
-		    {:
-			  System.out.println(MyParser.BLUE_OUTPUT + "Reduction by rule 39");
-			:};
+                 | Expression;
              
