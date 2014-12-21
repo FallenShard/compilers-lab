@@ -7,10 +7,13 @@
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/sym.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MySym.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyParser.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/ObjectNode.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyTable.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyParser.cup</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myinput.txt</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/TypeNode.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myspec.flex</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/SemanticTable.java</file>
         </group>
     </open-files>
 </project-private>

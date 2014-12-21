@@ -1,18 +1,13 @@
 main()
 {
-    a : real; 
-    b : int;
+    a : int; 
+    b : real;
     control : bool;
     ax : bool;
     ax = true;
-
-    a = 5;
-
-    b = 3;
-
-    read(a);
-    write(b);
-
-    while ((control != true) && ax)
-        a = a + b;
+    a = 5 + 3;
+    read(b, control);
+    write(a);
+    ax = control;
+    a = b;
 }

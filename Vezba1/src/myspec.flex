@@ -49,7 +49,8 @@ hexDigit = [0-9a-fA-F]
 <COMMENT>\n     { yybegin( YYINITIAL ); }
 <COMMENT>.      { ; }
 
-[\t\n\r ]       { ; }
+[\t\r\n ]       { ; }
+
 
 // Separators
 \{      { return new Symbol(sym.LBPAR); }
@@ -62,8 +63,8 @@ hexDigit = [0-9a-fA-F]
 ,       { return new Symbol(sym.COMMA); }
 
 // Bool values
-true    { return new Symbol(sym.CONST); }
-false   { return new Symbol(sym.CONST); }
+true    { return new Symbol(sym.BOOLCONST); }
+false   { return new Symbol(sym.BOOLCONST); }
 
 // Arithmetic operators
 \+      { return new Symbol(sym.PLUS); }
@@ -83,7 +84,7 @@ false   { return new Symbol(sym.CONST); }
 \>       { return new Symbol(sym.GT); }
 \>=      { return new Symbol(sym.GTE); }
 
-// Key words
+// Keywords
 "main"  { return new Symbol(sym.MAIN); }
 "int"  { return new Symbol(sym.INT); }
 "char"  { return new Symbol(sym.CHAR); }
@@ -95,13 +96,13 @@ false   { return new Symbol(sym.CONST); }
 
 
 // Identifiers
-({letter}|_)({letter}|{digit}|_)*   { return new Symbol(sym.ID); }
+({letter}|_)({letter}|{digit}|_)*   { return new Symbol(sym.ID, yyline, yytext()); }
 
-// Constants
-\${hexDigit}+                   { return new Symbol(sym.CONST); }
-{digit}+                        { return new Symbol(sym.CONST); }
-'[^]'                           { return new Symbol(sym.CONST); }
-0\.{digit}+(E[\+\-]?{digit}+)?  { return new Symbol(sym.CONST); }
+// Constants 
+\${hexDigit}+                   { return new Symbol(sym.INTCONST, Integer.parseInt(yytext().substring(1), 16)); }
+{digit}+                        { return new Symbol(sym.INTCONST, new Integer(yytext())); }
+'[^]'                           { return new Symbol(sym.CHARCONST, new Character(yytext().charAt(1))); }
+0\.{digit}+(E[\+\-]?{digit}+)?  { return new Symbol(sym.REALCONST, new Double(yytext())); }
 
 // Error symbol
 .                               { if (yytext() != null && yytext().length() > 0) 

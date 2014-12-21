@@ -2,15 +2,23 @@
 
 import java_cup.runtime.*;
 import java.io.*;
+import java.util.ArrayList;
 
 parser code {:
 
     public int errNo = 0;
+    public int warnNo = 0;
     public static final String ERROR_LINE = "Error at line <";
 
     public static final String RED_OUTPUT = "\u001B[31m";
     public static final String GREEN_OUTPUT = "\u001B[32m";
     public static final String BLUE_OUTPUT = "\u001B[34m";
+    public static final String YELLOW_OUTPUT = "\u001B[33m";
+
+    public static final String ERROR_COLOR = RED_OUTPUT;
+    public static final String WARNING_COLOR = YELLOW_OUTPUT;
+
+    public SymbolTable symbolTable = new SymbolTable();
 
     public static void main(String[] args)
     {
@@ -20,16 +28,45 @@ parser code {:
             Scanner scanner = new MyLexer(file);
             MyParser parser = new MyParser(scanner);
             parser.parse();
+            parser.checkWarnings();
 
-            if (parser.errNo == 0)
+            if (parser.errNo == 0 && parser.warnNo == 0)
                 System.out.println(GREEN_OUTPUT + "Parsing complete. No errors found!.");
             else
-                System.out.println(RED_OUTPUT + "Parsing complete. Number of errors: " + parser.errNo);
+            {
+                System.out.println(GREEN_OUTPUT + "Parsing complete.");
+                if (parser.errNo > 0)
+                    System.out.println(ERROR_COLOR + "Number of errors: " + parser.errNo);
+                if (parser.warnNo > 0)
+                    System.out.println(WARNING_COLOR + "Number of warnings: " + parser.warnNo);
+            }
         }
         catch(Exception e)
         {
             System.out.println(e);
+            e.printStackTrace();
         }
+    }
+
+    public void checkWarnings()
+    {
+        SymbolNode current = symbolTable.getVariables();
+        while (current != null)
+        {
+            VarNode var = (VarNode) current;
+            if (var.lastDef == -1 && var.lastUse == -1)
+            {
+                System.out.println(WARNING_COLOR + "Warning: Variable " + var.name + " is declared, but not used");
+                warnNo++;
+            }
+            else if (var.lastDef > var.lastUse)
+            {
+                System.out.println(WARNING_COLOR + "Warning: Assigned value to " + var.name + 
+                                   " in line " +  var.lastDef + " is not used anywhere.");
+                warnNo++;
+            }
+            current = current.next;
+        }   
     }
 
     public int getLine()
@@ -39,20 +76,34 @@ parser code {:
 
     public String getErrorLine()
     {
-        return RED_OUTPUT + MyParser.ERROR_LINE + getLine() + ">: ";
+        return ERROR_COLOR + MyParser.ERROR_LINE + getLine() + ">: ";
     }
 :};
 
+//init with {:
+//	symbolTable = new SymbolTable();
+//:}
+
 
 // Terminal symbols
-terminal WHILE, LPAR, ID, RPAR, ASSIGN, SEMICOLON, PLUS, CONST, MAIN, READ, WRITE, LBPAR, RBPAR, 
-COLON, COMMA, INT, CHAR, REAL, BOOL, MINUS, ASTER, FSLASH, LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
+terminal WHILE, MAIN, READ, WRITE, INT, CHAR, REAL, BOOL;
+terminal LPAR, RPAR, ASSIGN, SEMICOLON, LBPAR, RBPAR, COLON, COMMA, PLUS, MINUS, ASTER, FSLASH;
+terminal LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
+
+// terminal ID, CONST;
+
+terminal String ID;
+terminal Integer INTCONST;
+terminal Character CHARCONST;
+terminal Double REALCONST;
+terminal Boolean BOOLCONST;
 
 // Nonterminal symbols
-non terminal Program, Block, VarList, VarDecl, NameList, Type, StatementList, Statement, 
-Loop, Expression, AndExpression, RelExpression, RelOp, ArExpression, Term, Factor, ExpressionList;
+non terminal Program, Block, VarList, VarDecl, StatementList, Statement, Loop, RelOp, ExpressionList;
 
-
+non terminal TypeNode Type, Expression, AndExpression, RelExpression, ArExpression, Term, Factor;
+non terminal ArrayList NameList;
+non terminal ConstNode Constant;
 
 
 // Grammar
@@ -60,7 +111,7 @@ Loop, Expression, AndExpression, RelExpression, RelOp, ArExpression, Term, Facto
 Program ::= MAIN LPAR RPAR Block
           | MAIN LPAR RPAR error
           {:
-            System.out.println(parser.getErrorLine() + "Missing block");
+            System.out.println(parser.getErrorLine() + "Missing block.");
             parser.errNo++;
           :};
      
@@ -69,91 +120,247 @@ Block ::= LBPAR VarList StatementList RBPAR;
 VarList ::= VarList VarDecl
           | VarList error
           {:
-            System.out.println(parser.getErrorLine() + "Missing variable declaration");
+            System.out.println(parser.getErrorLine() + "Missing variable declaration.");
             parser.errNo++;
           :}
           | VarDecl
           | error
           {:
-            System.out.println(parser.getErrorLine() + "Invalid variable declaration");
+            System.out.println(parser.getErrorLine() + "Invalid variable declaration.");
             parser.errNo++;
           :};
     
-VarDecl ::= NameList COLON Type SEMICOLON
-          | NameList COLON Type error
+VarDecl ::= NameList:arr COLON Type:t SEMICOLON
           {:
+            for (int i = 0; i < arr.size(); i++)
+            {
+                String name = (String)arr.get(i);
+                
+                if (!parser.symbolTable.addVar(name, t))
+                {
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    parser.errNo++;
+                }
+            }
+          :}
+          | NameList:arr COLON Type:t error
+          {:
+            for (int i = 0; i < arr.size(); i++)
+            {
+                String name = (String)arr.get(i);
+                
+                if (!parser.symbolTable.addVar(name, t))
+                {
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    parser.errNo++;
+                }
+            }
             System.out.println(parser.getErrorLine() + "Missing semicolon");
             parser.errNo++;
           :}
-          | NameList error
+          | NameList:arr COLON error
           {:
+            TypeNode t = parser.symbolTable.getType("unknown");
+            for (int i = 0; i < arr.size(); i++)
+            {
+                String name = (String)arr.get(i);
+               
+                if (!parser.symbolTable.addVar(name, t))
+                {
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    parser.errNo++;
+                }
+            }
+            System.out.println(parser.getErrorLine() + "Invalid type name.");
+            parser.errNo++;
+          :}
+          | NameList:arr error
+          {:
+            TypeNode t = parser.symbolTable.getType("unknown");
+            for (int i = 0; i < arr.size(); i++)
+            {
+                String name = (String)arr.get(i);
+               
+                if (!parser.symbolTable.addVar(name, t))
+                {
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    parser.errNo++;
+                }
+            }
             System.out.println(parser.getErrorLine() + "Missing colon");
             parser.errNo++;
           :};
             
-NameList ::= NameList COMMA ID
-           | NameList COMMA error
+NameList ::= NameList:arr COMMA ID:name
            {:
-             System.out.println(parser.getErrorLine() + "Missing id after comma");
-             parser.errNo++;
+             RESULT = arr;
+             RESULT.add(name);
            :}
-           | ID;
+           | NameList:arr COMMA error
+           {:
+             System.out.println(parser.getErrorLine() + "Missing identifier after comma.");
+             parser.errNo++;
+             RESULT = arr;
+           :}
+           | ID:name
+           {:
+             RESULT = new ArrayList();
+             RESULT.add(name);
+           :};
             
 Type ::= INT
-       | CHAR
-       | REAL       
-       | BOOL
-       | error
        {:
-         System.out.println(parser.getErrorLine() + "Invalid type declaration");
-         parser.errNo++;
+         RESULT = parser.symbolTable.getType("int");
+       :}
+       | CHAR
+       {:
+         RESULT = parser.symbolTable.getType("char");
+       :}
+       | REAL
+       {:
+         RESULT = parser.symbolTable.getType("real");
+       :}       
+       | BOOL
+       {:
+         RESULT = parser.symbolTable.getType("bool");
        :};
             
 StatementList ::= StatementList Statement
                 | Statement;
                 
 Statement ::= Loop
-            | ID ASSIGN Expression SEMICOLON
-            | ID ASSIGN Expression error
+            | ID:name ASSIGN Expression:expr SEMICOLON
             {:
-              System.out.println(parser.getErrorLine() + "Missing semicolon at assignment");
+              VarNode var = parser.symbolTable.getVar(name);
+		      if (var == null)
+		      {
+                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                  parser.errNo++;
+		      }
+		      else 
+		      {
+		          var.lastDef = parser.getLine();
+		          if (var.type.typeKind != expr.typeKind)
+		          {
+		              System.out.println(parser.getErrorLine() + "Incompatible types in assignment");
+		      	      parser.errNo++;
+		          }
+		      }
+		    :}
+            | ID:name ASSIGN Expression:expr error
+            {:
+              VarNode var = parser.symbolTable.getVar(name);
+		      if (var == null)
+		      {
+                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                  parser.errNo++;
+		      }
+		      else 
+		      {
+		          var.lastDef = parser.getLine();
+		          if (var.type.typeKind != expr.typeKind)
+		          {
+		              System.out.println(parser.getErrorLine() + "Type mismatch in assignment");
+		      	      parser.errNo++;
+		          }
+		      }
+              System.out.println(parser.getErrorLine() + "Missing semicolon at assignment.");
               parser.errNo++;
             :}
-            ID ASSIGN  error
+            | ID:name ASSIGN error
             {:
-              System.out.println(parser.getErrorLine() + "Invalid statement");
+              VarNode var = parser.symbolTable.getVar(name);
+		      if (var == null)
+		      {
+                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                  parser.errNo++;
+		      }
+		      else 
+		          var.lastDef = parser.getLine();
+              System.out.println(parser.getErrorLine() + "Invalid assignment expression.");
               parser.errNo++;
             :}
-            | READ LPAR NameList RPAR SEMICOLON
-            | READ LPAR NameList RPAR error
+            | READ LPAR NameList:arr RPAR SEMICOLON
             {:
-              System.out.println(parser.getErrorLine() + "Missing semicolon");
+              for (int i = 0; i < arr.size(); i++)
+              {
+                  String name = (String)arr.get(i);
+                  VarNode var = parser.symbolTable.getVar(name);
+                 
+                  if (var == null)
+                  {
+                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                      parser.errNo++;
+                  }
+                  else
+                      var.lastDef = parser.getLine();
+              }
+            :}
+            | READ LPAR NameList:arr RPAR error
+            {:
+              for (int i = 0; i < arr.size(); i++)
+              {
+                  String name = (String)arr.get(i);
+                  VarNode var = parser.symbolTable.getVar(name);
+                 
+                  if (var == null)
+                  {
+                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                      parser.errNo++;
+                  }
+                  else
+                      var.lastDef = parser.getLine();
+              }
+              System.out.println(parser.getErrorLine() + "Missing semicolon at read.");
               parser.errNo++;
             :}
-            | READ LPAR NameList error
+            | READ LPAR NameList:arr error
             {:
-              System.out.println(parser.getErrorLine() + "Missing closing bracket on read");
+              for (int i = 0; i < arr.size(); i++)
+              {
+                  String name = (String)arr.get(i);
+                  VarNode var = parser.symbolTable.getVar(name);
+                 
+                  if (var == null)
+                  {
+                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+                      parser.errNo++;
+                  }
+                  else
+                      var.lastDef = parser.getLine();
+              }
+              System.out.println(parser.getErrorLine() + "Missing closing bracket on read.");
+              parser.errNo++;
+            :}
+            | READ LPAR error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing variable on read.");
               parser.errNo++;
             :}
             | READ error
             {:
-              System.out.println(parser.getErrorLine() + "Missing opening bracket on read");
+              System.out.println(parser.getErrorLine() + "Missing opening bracket on read.");
               parser.errNo++;
             :}
             | WRITE LPAR ExpressionList RPAR SEMICOLON
             | WRITE LPAR ExpressionList RPAR error
             {:
-              System.out.println(parser.getErrorLine() + "Missing semicolon");
+              System.out.println(parser.getErrorLine() + "Missing semicolon at write.");
               parser.errNo++;
             :}
             | WRITE LPAR ExpressionList error
             {:
-              System.out.println(parser.getErrorLine() + "Missing closing bracket on write");
+              System.out.println(parser.getErrorLine() + "Missing closing bracket on write.");
+              parser.errNo++;
+            :}
+            | WRITE LPAR error
+            {:
+              System.out.println(parser.getErrorLine() + "Missing expression on write.");
               parser.errNo++;
             :}
             | WRITE error
             {:
-              System.out.println(parser.getErrorLine() + "Missing opening bracket on write");
+              System.out.println(parser.getErrorLine() + "Missing opening bracket on write.");
               parser.errNo++;
             :}
             | Block;
@@ -170,14 +377,50 @@ Loop ::= WHILE LPAR Expression RPAR Statement
          parser.errNo++;
        :};
             
-Expression ::= Expression OR AndExpression
-             | AndExpression;
+Expression ::= Expression:expr1 OR AndExpression:expr2
+             {:
+               if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
+               {
+                   System.out.println(parser.getErrorLine() + "Cannot use logical OR on operands of type "
+                   + expr1.name + " and " + expr2.name + ".");
+                   parser.errNo++;
+               }
+               RESULT = parser.symbolTable.getType("bool");
+             :}
+             | AndExpression:expr
+             {:
+               RESULT = expr;
+             :};
             
-AndExpression ::= AndExpression AND RelExpression
-                | RelExpression;
+AndExpression ::= AndExpression:expr1 AND RelExpression:expr2
+                {:
+                  if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
+                  {
+                      System.out.println(parser.getErrorLine() + "Cannot use logical AND on operands of type "
+                      + expr1.name + " and " + expr2.name + ".");
+                      parser.errNo++;
+                  }
+                  RESULT = parser.symbolTable.getType("bool");
+                :}
+                | RelExpression:expr
+                {:
+                  RESULT = expr;
+                :};
 
-RelExpression ::= ArExpression RelOp ArExpression
-                | ArExpression;
+RelExpression ::= ArExpression:expr1 RelOp ArExpression:expr2
+                {:
+                  if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
+                  {
+                      System.out.println(parser.getErrorLine() + "Cannot use relational operator on operands of type "
+                      + expr1.name + " and " + expr2.name + ".");
+                      parser.errNo++;
+                  }
+                  RESULT = parser.symbolTable.getType("bool");
+                :}
+                | ArExpression:expr
+                {:
+                  RESULT = expr;
+                :};
 
 RelOp ::= LT
         | LTE
@@ -186,28 +429,159 @@ RelOp ::= LT
         | GT
         | GTE;
         
-ArExpression ::= ArExpression PLUS Term
-               | ArExpression MINUS Term
-               | Term;
+ArExpression ::= ArExpression:expr1 PLUS Term:expr2
+               {:
+                 if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+                 {
+                     System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator + on operands of type bool.");
+                     parser.errNo++;
+                     RESULT = parser.symbolTable.getType("bool");
+                 }
+                 else if (expr1.typeKind != expr2.typeKind)
+                 {
+                     System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
+                      + expr1.name + " and " + expr2.name + ".");
+                      parser.errNo++;
+                 }
+                 else if (expr1.typeKind == TypeNode.Char)
+                    RESULT = parser.symbolTable.getType("char");
+                 else if (expr1.typeKind == TypeNode.Real)
+                    RESULT = parser.symbolTable.getType("real");
+                 else if (expr1.typeKind == TypeNode.Int)
+                    RESULT = parser.symbolTable.getType("int");
+               :}
+               | ArExpression:expr1 MINUS Term:expr2
+               {:
+                 if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+                 {
+                     System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator - on operands of type bool.");
+                     parser.errNo++;
+                     RESULT = parser.symbolTable.getType("bool");
+                 }
+                 else if (expr1.typeKind != expr2.typeKind)
+                 {
+                     System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
+                      + expr1.name + " and " + expr2.name + ".");
+                      parser.errNo++;
+                 }
+                 else if (expr1.typeKind == TypeNode.Char)
+                    RESULT = parser.symbolTable.getType("char");
+                 else if (expr1.typeKind == TypeNode.Real)
+                    RESULT = parser.symbolTable.getType("real");
+                 else if (expr1.typeKind == TypeNode.Int)
+                    RESULT = parser.symbolTable.getType("int");
+               :}
+               | Term:expr
+               {:
+                 RESULT = expr;
+               :};
             
-Term ::= Term ASTER Factor
-       | Term FSLASH Factor
-       | Factor;
+Term ::= Term:expr1 ASTER Factor:expr2
+       {:
+         if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+         {
+             System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator * on operands of type bool.");
+             parser.errNo++;
+             RESULT = parser.symbolTable.getType("bool");
+         }
+         else if (expr1.typeKind != expr2.typeKind)
+         {
+             System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
+              + expr1.name + " and " + expr2.name + ".");
+              parser.errNo++;
+         }
+         else if (expr1.typeKind == TypeNode.Char)
+            RESULT = parser.symbolTable.getType("char");
+         else if (expr1.typeKind == TypeNode.Real)
+            RESULT = parser.symbolTable.getType("real");
+         else if (expr1.typeKind == TypeNode.Int)
+            RESULT = parser.symbolTable.getType("int");
+       :}
+       | Term:expr1 FSLASH Factor:expr2
+       {:
+         if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+         {
+             System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator / on operands of type bool.");
+             parser.errNo++;
+             RESULT = parser.symbolTable.getType("bool");
+         }
+         else if (expr1.typeKind != expr2.typeKind)
+         {
+             System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
+              + expr1.name + " and " + expr2.name + ".");
+              parser.errNo++;
+         }
+         else if (expr1.typeKind == TypeNode.Char)
+            RESULT = parser.symbolTable.getType("char");
+         else if (expr1.typeKind == TypeNode.Real)
+            RESULT = parser.symbolTable.getType("real");
+         else if (expr1.typeKind == TypeNode.Int)
+            RESULT = parser.symbolTable.getType("int");
+       :}
+       | Factor:expr
+       {:
+         RESULT = expr;
+       :};
             
-Factor ::= ID 
-         | CONST
-         | LPAR Expression RPAR
-         | LPAR Expression error
+Factor ::= ID:name
+         {:
+           VarNode var = parser.symbolTable.getVar(name);
+           if (var == null)
+           {
+               System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
+               RESULT = parser.symbolTable.getType("unknown");
+               parser.errNo++;
+           }
+           else 
+           {
+               RESULT = var.type;
+               if (var.lastDef == -1)
+               {
+                   System.out.println(parser.getErrorLine() + "Variable " + name + " is not initialized.");
+                   parser.errNo++;
+               }
+               var.lastUse = parser.getLine();
+           }
+         :}
+         | Constant:con
+         {:
+           RESULT = con.type;
+         :}
+         | LPAR Expression:expr RPAR
+         {:
+           RESULT = expr;
+         :}
+         | LPAR Expression:expr error
          {:
            System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
            parser.errNo++;
+           RESULT = expr;
          :}
          | error
          {:
            System.out.println(parser.getErrorLine() + "Unknown factor statement");
            parser.errNo++;
+           RESULT = parser.symbolTable.getType("unknown");
          :};
 
 ExpressionList ::= ExpressionList COMMA Expression 
                  | Expression;
+                 
+Constant ::= INTCONST:c
+             {:
+                RESULT = new ConstNode(parser.symbolTable.getType("int"), c);
+             :}
+           | BOOLCONST:c
+             {:
+                RESULT = new ConstNode(parser.symbolTable.getType("bool"), c);
+             :}
+           | REALCONST:c
+             {:
+                RESULT = new ConstNode(parser.symbolTable.getType("real"), c);
+             :}
+           | CHARCONST:c
+             {:
+                RESULT = new ConstNode(parser.symbolTable.getType("char"), c);
+             :}
+           ;
              
