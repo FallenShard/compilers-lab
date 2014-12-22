@@ -1,13 +1,51 @@
 main()
 {
-    a : int; 
-    b : real;
+    a, b, sum : int; 
+    c : real;
     control : bool;
-    ax : bool;
-    ax = true;
-    a = 5 + 3;
-    read(b, control);
-    write(a);
-    ax = control;
-    a = b;
+
+    control = true;
+    //sum = 0;
+    //sum = 5;
+    //sum = 3;
+    //sum = 4;
+    a = 5;
+    sum = 0;
+    while (control == true)
+    {
+        counter, incrementor : int;
+        a, x : int;
+
+        read(b, control);
+
+        a = $123;
+        sum = sum + b + a;
+        write(b);
+    }   
+
+    write(sum);
+
+    {
+        a, b: real;
+        a = 0.3;
+        b = 0.5E1;
+        a = a * b;
+        write(a);
+    }
+
+    {
+        a, sum, x : bool;
+        a = true;
+        sum = false;
+        while (a && sum)
+        {
+            z : int;
+            z = 3;
+            x = true;
+            write(x);
+            write(z);
+        }
+    }
+
+    write(sum);
 }

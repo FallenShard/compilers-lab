@@ -31,6 +31,9 @@ import java_cup.runtime.*;
    {
       return yyline;
    }
+
+   SymbolTable s = null;
+   public void getParser(MyParser parser) {s = parser.symbolTable;}
 %}
 
 // This directive adds "//comment" state to the state machine

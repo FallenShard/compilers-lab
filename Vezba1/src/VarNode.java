@@ -13,10 +13,26 @@ public class VarNode extends SymbolNode
     public int lastDef;
     public int lastUse;
     
+    public int scope;
+    
     public VarNode(String name, TypeNode type, SymbolNode next)
     {
         super(name, SymbolNode.VAR, type, next);
         lastDef = -1;
         lastUse = -1;
+    }
+    
+    public VarNode(String name, TypeNode type, SymbolNode next, int scope)
+    {
+        super(name, SymbolNode.VAR, type, next);
+        lastDef = -1;
+        lastUse = -1;
+        this.scope = scope;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return name + " | scope: " + scope;
     }
 }

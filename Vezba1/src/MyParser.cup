@@ -19,6 +19,8 @@ parser code {:
     public static final String WARNING_COLOR = YELLOW_OUTPUT;
 
     public SymbolTable symbolTable = new SymbolTable();
+    
+    public boolean shouldIncrScope = false;
 
     public static void main(String[] args)
     {
@@ -27,8 +29,11 @@ parser code {:
             FileReader file = new FileReader(args[0]);
             Scanner scanner = new MyLexer(file);
             MyParser parser = new MyParser(scanner);
+            //((MyLexer)scanner).getParser(parser);
             parser.parse();
             parser.checkWarnings();
+            
+            parser.symbolTable.printAllVars();
 
             if (parser.errNo == 0 && parser.warnNo == 0)
                 System.out.println(GREEN_OUTPUT + "Parsing complete. No errors found!.");
@@ -78,6 +83,12 @@ parser code {:
     {
         return ERROR_COLOR + MyParser.ERROR_LINE + getLine() + ">: ";
     }
+    
+    public void debug(String param)
+    {
+        System.out.println(param + ", SCOPE: " + symbolTable.activeScope + ", LINE: " + getLine());
+    }
+    
 :};
 
 //init with {:
@@ -104,6 +115,7 @@ non terminal Program, Block, VarList, VarDecl, StatementList, Statement, Loop, R
 non terminal TypeNode Type, Expression, AndExpression, RelExpression, ArExpression, Term, Factor;
 non terminal ArrayList NameList;
 non terminal ConstNode Constant;
+non terminal ScopeStart, ScopeEnd;
 
 
 // Grammar
@@ -115,15 +127,32 @@ Program ::= MAIN LPAR RPAR Block
             parser.errNo++;
           :};
      
-Block ::= LBPAR VarList StatementList RBPAR;        
+Block ::= ScopeStart VarList StatementList ScopeEnd;
+
+ScopeStart ::= LBPAR
+             {:
+                parser.symbolTable.incrScope();
+             :};
+
+ScopeEnd ::= RBPAR
+           {:
+             parser.symbolTable.decrScope();
+           :};
               
 VarList ::= VarList VarDecl
+          {:
+            //parser.debug("VarListRecursive");
+          :}
           | VarList error
           {:
             System.out.println(parser.getErrorLine() + "Missing variable declaration.");
             parser.errNo++;
           :}
           | VarDecl
+          {:
+            //parser.debug("VarListTail");
+            parser.symbolTable.firstStatement = true;
+                        :}
           | error
           {:
             System.out.println(parser.getErrorLine() + "Invalid variable declaration.");
@@ -138,7 +167,7 @@ VarDecl ::= NameList:arr COLON Type:t SEMICOLON
                 
                 if (!parser.symbolTable.addVar(name, t))
                 {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared.");
                     parser.errNo++;
                 }
             }
@@ -151,7 +180,7 @@ VarDecl ::= NameList:arr COLON Type:t SEMICOLON
                 
                 if (!parser.symbolTable.addVar(name, t))
                 {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
+                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared.");
                     parser.errNo++;
                 }
             }
@@ -226,7 +255,15 @@ Type ::= INT
        :};
             
 StatementList ::= StatementList Statement
-                | Statement;
+                {:
+                  //parser.symbolTable.activeScope++;
+                //parser.debug("StatementListRecursive");
+                :}
+                | Statement
+                {:
+                //parser.symbolTable.activeScope++;
+                //parser.debug("StatementListTail");
+                :};
                 
 Statement ::= Loop
             | ID:name ASSIGN Expression:expr SEMICOLON
@@ -365,7 +402,16 @@ Statement ::= Loop
             :}
             | Block;
                 
-Loop ::= WHILE LPAR Expression RPAR Statement
+Loop ::= WHILE LPAR Expression:expr RPAR Statement
+       {:
+         if (expr.typeKind != TypeNode.Bool)
+         {
+             System.out.println(parser.getErrorLine() + "Loop expression does not evaluate to bool: "
+             + expr.name + " provided.");
+             parser.errNo++;
+         }
+         RESULT = parser.symbolTable.getType("bool");
+       :}
        | WHILE LPAR Expression error
        {:
          System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
