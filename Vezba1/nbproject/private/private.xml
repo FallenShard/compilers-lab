@@ -3,20 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MySym.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/SymbolNode.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/ConstNode.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myinput.txt</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/TypeNode.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyToken.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/sym.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyLexer.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyParser.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/SymbolTable.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyTable.java</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/VarNode.java</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/MyParser.cup</file>
-            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myinput_old.txt</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myinput.txt</file>
             <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/myspec.flex</file>
         </group>
     </open-files>

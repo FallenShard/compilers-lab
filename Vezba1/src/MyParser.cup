@@ -73,7 +73,107 @@ parser code {:
             current = current.next;
         }   
     }
+    
+    public void checkRedeclaration(ArrayList names, TypeNode type)
+    {
+        for (int i = 0; i < names.size(); i++)
+        {
+            String name = (String)names.get(i);
+            
+            if (!symbolTable.addVar(name, type))
+            {
+                System.out.println(getErrorLine() + "Variable " + name + " is already declared.");
+                errNo++;
+            }
+        }
+    }
+    
+    public void checkDeclAndType(String name, TypeNode expr)
+    {
+        VarNode var = symbolTable.getVar(name);
+        if (var == null)
+        {
+            System.out.println(getErrorLine() + "Variable " + name + " is not declared.");
+            errNo++;
+        }
+        else 
+        {
+            var.lastDef = getLine();
+            if (var.type.typeKind != expr.typeKind)
+            {
+                System.out.println(getErrorLine() + "Type mismatch in assignment.");
+                errNo++;
+            }
+        }
+    }
 
+    public void checkDecl(String name)
+    {
+        VarNode var = symbolTable.getVar(name);
+        if (var == null)
+        {
+            System.out.println(getErrorLine() + "Variable " + name + " is not declared.");
+            errNo++;
+        }
+        else 
+            var.lastDef = getLine();
+    }
+    
+    public void checkNameListDecl(ArrayList names)
+    {
+        for (int i = 0; i < names.size(); i++)
+        {
+            String name = (String)names.get(i);
+            checkDecl(name);
+        }
+    }
+    
+    public void checkExprType(TypeNode expr, int typeCode, String typeName)
+    {
+        if (expr.typeKind != typeCode)
+         {
+             System.out.println(getErrorLine() + "Loop expression does not evaluate to " +
+             typeName + ": " + expr.name + " provided.");
+             errNo++;
+         }
+    }
+    
+    public void checkExprTypes(TypeNode expr1, TypeNode expr2, int typeCode, String operator)
+    {
+        if (expr1.typeKind != typeCode || expr2.typeKind != typeCode)
+        {
+            System.out.println(getErrorLine() + "Cannot use " + operator + " on operands of type "
+            + expr1.name + " and " + expr2.name + ".");
+            errNo++;
+        }
+    }
+    
+    public TypeNode checkArithmetics(TypeNode expr1, TypeNode expr2, String operator)
+    {
+        TypeNode result = null;
+        if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+        {
+            System.out.println(getErrorLine() + "Cannot use arithmetic operator " + operator + " on operands of type bool.");
+            errNo++;
+            result = symbolTable.getType("bool");
+        }
+        else if (expr1.typeKind != expr2.typeKind)
+        {
+            System.out.println(getErrorLine() + "Operand type mismatch on operator " + operator + ": "
+             + expr1.name + " and " + expr2.name + ".");
+            errNo++;
+            result = symbolTable.getType("unknown");
+        }
+        else if (expr1.typeKind == TypeNode.Char)
+            result = symbolTable.getType("char");
+        else if (expr1.typeKind == TypeNode.Real)
+            result = symbolTable.getType("real");
+        else if (expr1.typeKind == TypeNode.Int)
+            result = symbolTable.getType("int");
+           
+        return result;
+    }
+    
     public int getLine()
     {
         return ((MyLexer)getScanner()).getLine() + 1;
@@ -131,7 +231,7 @@ Block ::= ScopeStart VarList StatementList ScopeEnd;
 
 ScopeStart ::= LBPAR
              {:
-                parser.symbolTable.incrScope();
+               parser.symbolTable.incrScope();
              :};
 
 ScopeEnd ::= RBPAR
@@ -140,19 +240,12 @@ ScopeEnd ::= RBPAR
            :};
               
 VarList ::= VarList VarDecl
-          {:
-            //parser.debug("VarListRecursive");
-          :}
           | VarList error
           {:
             System.out.println(parser.getErrorLine() + "Missing variable declaration.");
             parser.errNo++;
           :}
           | VarDecl
-          {:
-            //parser.debug("VarListTail");
-            parser.symbolTable.firstStatement = true;
-                        :}
           | error
           {:
             System.out.println(parser.getErrorLine() + "Invalid variable declaration.");
@@ -161,61 +254,23 @@ VarList ::= VarList VarDecl
     
 VarDecl ::= NameList:arr COLON Type:t SEMICOLON
           {:
-            for (int i = 0; i < arr.size(); i++)
-            {
-                String name = (String)arr.get(i);
-                
-                if (!parser.symbolTable.addVar(name, t))
-                {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared.");
-                    parser.errNo++;
-                }
-            }
+            parser.checkRedeclaration(arr, t);
           :}
           | NameList:arr COLON Type:t error
           {:
-            for (int i = 0; i < arr.size(); i++)
-            {
-                String name = (String)arr.get(i);
-                
-                if (!parser.symbolTable.addVar(name, t))
-                {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared.");
-                    parser.errNo++;
-                }
-            }
+            parser.checkRedeclaration(arr, t);
             System.out.println(parser.getErrorLine() + "Missing semicolon");
             parser.errNo++;
           :}
           | NameList:arr COLON error
           {:
-            TypeNode t = parser.symbolTable.getType("unknown");
-            for (int i = 0; i < arr.size(); i++)
-            {
-                String name = (String)arr.get(i);
-               
-                if (!parser.symbolTable.addVar(name, t))
-                {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
-                    parser.errNo++;
-                }
-            }
+            parser.checkRedeclaration(arr, parser.symbolTable.getType("unknown"));
             System.out.println(parser.getErrorLine() + "Invalid type name.");
             parser.errNo++;
           :}
           | NameList:arr error
           {:
-            TypeNode t = parser.symbolTable.getType("unknown");
-            for (int i = 0; i < arr.size(); i++)
-            {
-                String name = (String)arr.get(i);
-               
-                if (!parser.symbolTable.addVar(name, t))
-                {
-                    System.out.println(parser.getErrorLine() + "Variable " + name + " is already declared." );
-                    parser.errNo++;
-                }
-            }
+            parser.checkRedeclaration(arr, parser.symbolTable.getType("unknown"));
             System.out.println(parser.getErrorLine() + "Missing colon");
             parser.errNo++;
           :};
@@ -255,117 +310,38 @@ Type ::= INT
        :};
             
 StatementList ::= StatementList Statement
-                {:
-                  //parser.symbolTable.activeScope++;
-                //parser.debug("StatementListRecursive");
-                :}
-                | Statement
-                {:
-                //parser.symbolTable.activeScope++;
-                //parser.debug("StatementListTail");
-                :};
+                | Statement;
                 
 Statement ::= Loop
             | ID:name ASSIGN Expression:expr SEMICOLON
             {:
-              VarNode var = parser.symbolTable.getVar(name);
-		      if (var == null)
-		      {
-                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                  parser.errNo++;
-		      }
-		      else 
-		      {
-		          var.lastDef = parser.getLine();
-		          if (var.type.typeKind != expr.typeKind)
-		          {
-		              System.out.println(parser.getErrorLine() + "Incompatible types in assignment");
-		      	      parser.errNo++;
-		          }
-		      }
+              parser.checkDeclAndType(name, expr);
 		    :}
             | ID:name ASSIGN Expression:expr error
             {:
-              VarNode var = parser.symbolTable.getVar(name);
-		      if (var == null)
-		      {
-                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                  parser.errNo++;
-		      }
-		      else 
-		      {
-		          var.lastDef = parser.getLine();
-		          if (var.type.typeKind != expr.typeKind)
-		          {
-		              System.out.println(parser.getErrorLine() + "Type mismatch in assignment");
-		      	      parser.errNo++;
-		          }
-		      }
+              parser.checkDeclAndType(name, expr);
               System.out.println(parser.getErrorLine() + "Missing semicolon at assignment.");
               parser.errNo++;
             :}
             | ID:name ASSIGN error
             {:
-              VarNode var = parser.symbolTable.getVar(name);
-		      if (var == null)
-		      {
-                  System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                  parser.errNo++;
-		      }
-		      else 
-		          var.lastDef = parser.getLine();
+              parser.checkDecl(name);
               System.out.println(parser.getErrorLine() + "Invalid assignment expression.");
               parser.errNo++;
             :}
             | READ LPAR NameList:arr RPAR SEMICOLON
             {:
-              for (int i = 0; i < arr.size(); i++)
-              {
-                  String name = (String)arr.get(i);
-                  VarNode var = parser.symbolTable.getVar(name);
-                 
-                  if (var == null)
-                  {
-                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                      parser.errNo++;
-                  }
-                  else
-                      var.lastDef = parser.getLine();
-              }
+              parser.checkNameListDecl(arr);
             :}
             | READ LPAR NameList:arr RPAR error
             {:
-              for (int i = 0; i < arr.size(); i++)
-              {
-                  String name = (String)arr.get(i);
-                  VarNode var = parser.symbolTable.getVar(name);
-                 
-                  if (var == null)
-                  {
-                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                      parser.errNo++;
-                  }
-                  else
-                      var.lastDef = parser.getLine();
-              }
+              parser.checkNameListDecl(arr);
               System.out.println(parser.getErrorLine() + "Missing semicolon at read.");
               parser.errNo++;
             :}
             | READ LPAR NameList:arr error
             {:
-              for (int i = 0; i < arr.size(); i++)
-              {
-                  String name = (String)arr.get(i);
-                  VarNode var = parser.symbolTable.getVar(name);
-                 
-                  if (var == null)
-                  {
-                      System.out.println(parser.getErrorLine() + "Variable " + name + " is not declared.");
-                      parser.errNo++;
-                  }
-                  else
-                      var.lastDef = parser.getLine();
-              }
+              parser.checkNameListDecl(arr);
               System.out.println(parser.getErrorLine() + "Missing closing bracket on read.");
               parser.errNo++;
             :}
@@ -404,16 +380,13 @@ Statement ::= Loop
                 
 Loop ::= WHILE LPAR Expression:expr RPAR Statement
        {:
-         if (expr.typeKind != TypeNode.Bool)
-         {
-             System.out.println(parser.getErrorLine() + "Loop expression does not evaluate to bool: "
-             + expr.name + " provided.");
-             parser.errNo++;
-         }
+         parser.checkExprType(expr, TypeNode.Bool, "bool");
          RESULT = parser.symbolTable.getType("bool");
        :}
-       | WHILE LPAR Expression error
+       | WHILE LPAR Expression:expr error
        {:
+         parser.checkExprType(expr, TypeNode.Bool, "bool");
+         RESULT = parser.symbolTable.getType("bool");
          System.out.println(parser.getErrorLine() + "Missing parenthesis after expression");
          parser.errNo++;
        :}
@@ -425,12 +398,7 @@ Loop ::= WHILE LPAR Expression:expr RPAR Statement
             
 Expression ::= Expression:expr1 OR AndExpression:expr2
              {:
-               if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
-               {
-                   System.out.println(parser.getErrorLine() + "Cannot use logical OR on operands of type "
-                   + expr1.name + " and " + expr2.name + ".");
-                   parser.errNo++;
-               }
+               parser.checkExprTypes(expr1, expr2, TypeNode.Bool, "Logical OR");
                RESULT = parser.symbolTable.getType("bool");
              :}
              | AndExpression:expr
@@ -440,12 +408,7 @@ Expression ::= Expression:expr1 OR AndExpression:expr2
             
 AndExpression ::= AndExpression:expr1 AND RelExpression:expr2
                 {:
-                  if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
-                  {
-                      System.out.println(parser.getErrorLine() + "Cannot use logical AND on operands of type "
-                      + expr1.name + " and " + expr2.name + ".");
-                      parser.errNo++;
-                  }
+                  parser.checkExprTypes(expr1, expr2, TypeNode.Bool, "Logical AND");
                   RESULT = parser.symbolTable.getType("bool");
                 :}
                 | RelExpression:expr
@@ -477,45 +440,11 @@ RelOp ::= LT
         
 ArExpression ::= ArExpression:expr1 PLUS Term:expr2
                {:
-                 if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
-                 {
-                     System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator + on operands of type bool.");
-                     parser.errNo++;
-                     RESULT = parser.symbolTable.getType("bool");
-                 }
-                 else if (expr1.typeKind != expr2.typeKind)
-                 {
-                     System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
-                      + expr1.name + " and " + expr2.name + ".");
-                      parser.errNo++;
-                 }
-                 else if (expr1.typeKind == TypeNode.Char)
-                    RESULT = parser.symbolTable.getType("char");
-                 else if (expr1.typeKind == TypeNode.Real)
-                    RESULT = parser.symbolTable.getType("real");
-                 else if (expr1.typeKind == TypeNode.Int)
-                    RESULT = parser.symbolTable.getType("int");
+                 RESULT = parser.checkArithmetics(expr1, expr2, "+");
                :}
                | ArExpression:expr1 MINUS Term:expr2
                {:
-                 if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
-                 {
-                     System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator - on operands of type bool.");
-                     parser.errNo++;
-                     RESULT = parser.symbolTable.getType("bool");
-                 }
-                 else if (expr1.typeKind != expr2.typeKind)
-                 {
-                     System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
-                      + expr1.name + " and " + expr2.name + ".");
-                      parser.errNo++;
-                 }
-                 else if (expr1.typeKind == TypeNode.Char)
-                    RESULT = parser.symbolTable.getType("char");
-                 else if (expr1.typeKind == TypeNode.Real)
-                    RESULT = parser.symbolTable.getType("real");
-                 else if (expr1.typeKind == TypeNode.Int)
-                    RESULT = parser.symbolTable.getType("int");
+                 RESULT = parser.checkArithmetics(expr1, expr2, "-");
                :}
                | Term:expr
                {:
@@ -524,45 +453,11 @@ ArExpression ::= ArExpression:expr1 PLUS Term:expr2
             
 Term ::= Term:expr1 ASTER Factor:expr2
        {:
-         if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
-         {
-             System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator * on operands of type bool.");
-             parser.errNo++;
-             RESULT = parser.symbolTable.getType("bool");
-         }
-         else if (expr1.typeKind != expr2.typeKind)
-         {
-             System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
-              + expr1.name + " and " + expr2.name + ".");
-              parser.errNo++;
-         }
-         else if (expr1.typeKind == TypeNode.Char)
-            RESULT = parser.symbolTable.getType("char");
-         else if (expr1.typeKind == TypeNode.Real)
-            RESULT = parser.symbolTable.getType("real");
-         else if (expr1.typeKind == TypeNode.Int)
-            RESULT = parser.symbolTable.getType("int");
+         RESULT = parser.checkArithmetics(expr1, expr2, "*");
        :}
        | Term:expr1 FSLASH Factor:expr2
        {:
-         if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
-         {
-             System.out.println(parser.getErrorLine() + "Cannot use arithmetic operator / on operands of type bool.");
-             parser.errNo++;
-             RESULT = parser.symbolTable.getType("bool");
-         }
-         else if (expr1.typeKind != expr2.typeKind)
-         {
-             System.out.println(parser.getErrorLine() + "Operand type mismatch on operator +: "
-              + expr1.name + " and " + expr2.name + ".");
-              parser.errNo++;
-         }
-         else if (expr1.typeKind == TypeNode.Char)
-            RESULT = parser.symbolTable.getType("char");
-         else if (expr1.typeKind == TypeNode.Real)
-            RESULT = parser.symbolTable.getType("real");
-         else if (expr1.typeKind == TypeNode.Int)
-            RESULT = parser.symbolTable.getType("int");
+         RESULT = parser.checkArithmetics(expr1, expr2, "/");
        :}
        | Factor:expr
        {:

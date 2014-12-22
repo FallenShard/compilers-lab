@@ -5,20 +5,19 @@ main()
     control : bool;
 
     control = true;
-    //sum = 0;
-    //sum = 5;
-    //sum = 3;
-    //sum = 4;
     a = 5;
     sum = 0;
     while (control == true)
     {
         counter, incrementor : int;
         a, x : int;
+        y : char;
+
+        y = 'a';
 
         read(b, control);
 
-        a = $123;
+        a = $123A;
         sum = sum + b + a;
         write(b);
     }   
