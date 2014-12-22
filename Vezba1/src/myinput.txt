@@ -7,7 +7,7 @@ main()
     control = true;
     a = 5;
     sum = 0;
-    while (control == true)
+    while (control && (a > sum))
     {
         counter, incrementor : int;
         a, x : int;

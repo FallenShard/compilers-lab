@@ -155,7 +155,7 @@ parser code {:
         {
             System.out.println(getErrorLine() + "Cannot use arithmetic operator " + operator + " on operands of type bool.");
             errNo++;
-            result = symbolTable.getType("bool");
+            result = symbolTable.getType("unknown");
         }
         else if (expr1.typeKind != expr2.typeKind)
         {
@@ -170,6 +170,20 @@ parser code {:
             result = symbolTable.getType("real");
         else if (expr1.typeKind == TypeNode.Int)
             result = symbolTable.getType("int");
+           
+        return result;
+    }
+    
+    public TypeNode checkRelOp(TypeNode expr1, TypeNode expr2)
+    {
+        TypeNode result = null;
+        if (expr1.typeKind == TypeNode.Bool || expr2.typeKind == TypeNode.Bool)
+        {
+            System.out.println(getErrorLine() + "Cannot use relational operators on operands of type bool.");
+            errNo++;
+            result = symbolTable.getType("unknown");
+        }
+            result = symbolTable.getType("bool");
            
         return result;
     }
@@ -418,13 +432,7 @@ AndExpression ::= AndExpression:expr1 AND RelExpression:expr2
 
 RelExpression ::= ArExpression:expr1 RelOp ArExpression:expr2
                 {:
-                  if (expr1.typeKind != TypeNode.Bool || expr2.typeKind != TypeNode.Bool)
-                  {
-                      System.out.println(parser.getErrorLine() + "Cannot use relational operator on operands of type "
-                      + expr1.name + " and " + expr2.name + ".");
-                      parser.errNo++;
-                  }
-                  RESULT = parser.symbolTable.getType("bool");
+                  RESULT = parser.checkRelOp(expr1, expr2);
                 :}
                 | ArExpression:expr
                 {:
