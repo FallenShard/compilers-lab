@@ -29,7 +29,6 @@ parser code {:
             FileReader file = new FileReader(args[0]);
             Scanner scanner = new MyLexer(file);
             MyParser parser = new MyParser(scanner);
-            //((MyLexer)scanner).getParser(parser);
             parser.parse();
             parser.checkWarnings();
             
