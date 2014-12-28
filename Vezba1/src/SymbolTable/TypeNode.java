@@ -23,6 +23,7 @@ public class TypeNode extends SymbolNode
     
     public int typeKind;
     
+    @SuppressWarnings("LeakingThisInConstructor")
     public TypeNode(String name, int tKind, SymbolNode next)
     {
         super(name, SymbolNode.TYPE, null, next);

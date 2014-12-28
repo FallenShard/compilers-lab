@@ -1,0 +1,32 @@
+//import section
+
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.ArrayList;
+import SymbolTable.*;
+
+parser code
+{:
+    SymbolTable symbolTable = new SymbolTable();
+:};
+
+// Terminal symbols
+terminal WHILE, MAIN, READ, WRITE, INT, CHAR, REAL, BOOL;
+terminal LPAR, RPAR, ASSIGN, SEMICOLON, LBPAR, RBPAR, COLON, COMMA, PLUS, MINUS, ASTER, FSLASH;
+terminal LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
+
+// terminal ID, CONST;
+
+terminal String ID;
+terminal Integer INTCONST;
+terminal Character CHARCONST;
+terminal Double REALCONST;
+terminal Boolean BOOLCONST;
+
+// Nonterminal symbols
+non terminal Program, Block, VarList, VarDecl, StatementList, Statement, Loop, RelOp, ExpressionList;
+
+non terminal TypeNode Type, Expression, AndExpression, RelExpression, ArExpression, Term, Factor;
+non terminal ArrayList NameList;
+non terminal ConstNode Constant;
+non terminal ScopeStart, ScopeEnd;

@@ -5,17 +5,15 @@ import java.io.*;
 
 public abstract class ASTNode
 {
-	
-//	broj kreiranih privremenih promenljivih
+    // Number of temp variables
 	private static int varNo;
 	
-	//broj kreiranih labela
+	// Number of created labels
 	private static int labNo;
 	
 	public static String genVar()
 	{
-		//trebalo bi kreiranu promenljivu upisati
-		//u tabelu simbola
+		// This variable should be written into the symbol table
 		return "$tmp" + varNo++;
 	}
 	
@@ -24,6 +22,5 @@ public abstract class ASTNode
 		return "lab" + labNo++;
 	}
 	
-	public abstract void translate( BufferedWriter out )
-	throws IOException;
+	public abstract void translate(BufferedWriter out) throws IOException;
 }

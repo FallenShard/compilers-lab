@@ -22,9 +22,7 @@ public class SymbolTable
     private int scopeIdCounter;
     public int activeScope;
     
-    private Stack<Integer> scopeStack = new Stack<>();
-    
-    public boolean firstStatement = true;
+    private final Stack<Integer> scopeStack = new Stack<>();
     
     public SymbolTable()
     {
