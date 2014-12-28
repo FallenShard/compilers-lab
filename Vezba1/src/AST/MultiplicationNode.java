@@ -1,9 +1,9 @@
 package AST;
 
-public class ProductNode extends BinaryExprNode
+public class MultiplicationNode extends BinaryExprNode
 {
 	
-	public ProductNode(ExprNode left, ExprNode right)
+	public MultiplicationNode(ExprNode left, ExprNode right)
 	{
 		super(left, right);
 	}

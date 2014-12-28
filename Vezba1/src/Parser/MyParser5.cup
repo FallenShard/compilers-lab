@@ -1,9 +1,12 @@
 //import section
 
+package Parser;
+
 import java_cup.runtime.*;
 import java.io.*;
 import java.util.ArrayList;
 import SymbolTable.*;
+import AST.*;
 
 parser code
 {:
@@ -11,11 +14,10 @@ parser code
 :};
 
 // Terminal symbols
-terminal WHILE, MAIN, READ, WRITE, INT, CHAR, REAL, BOOL;
-terminal LPAR, RPAR, ASSIGN, SEMICOLON, LBPAR, RBPAR, COLON, COMMA, PLUS, MINUS, ASTER, FSLASH;
-terminal LT, LTE, EQ, NEQ, GT, GTE, AND, OR;
-
-// terminal ID, CONST;
+terminal MAIN, INT, CHAR, REAL, BOOL, WHILE;
+terminal LPAR, RPAR, LBPAR, RBPAR, COLON, SEMICOLON, COMMA;
+terminal ASSIGN, PLUS, MINUS, ASTER, FSLASH;
+terminal OR, AND, LT, EQ, GT;
 
 terminal String ID;
 terminal Integer INTCONST;
@@ -24,9 +26,226 @@ terminal Double REALCONST;
 terminal Boolean BOOLCONST;
 
 // Nonterminal symbols
-non terminal Program, Block, VarList, VarDecl, StatementList, Statement, Loop, RelOp, ExpressionList;
+non terminal BlockNode Program, Block, StatementList;
+non terminal VarList, VarDecl;
 
-non terminal TypeNode Type, Expression, AndExpression, RelExpression, ArExpression, Term, Factor;
+non terminal StatementNode Statement;
+non terminal WhileStatementNode Loop;
+
+non terminal TypeNode Type;
+non terminal String RelOp;
+
+non terminal ExprNode Expression, AndExpression, RelExpression, ArExpression, Term, Factor;
 non terminal ArrayList NameList;
 non terminal ConstNode Constant;
-non terminal ScopeStart, ScopeEnd;
+//non terminal ScopeStart, ScopeEnd;
+
+// Grammar
+
+Program ::= MAIN LPAR RPAR Block:block
+          {:
+            RESULT = block;
+          :};
+         
+Block ::= LBPAR VarList StatementList:stl RBPAR
+        {:
+          RESULT = stl;
+        :};
+       
+VarList ::= VarList VarDecl
+          | VarDecl;
+          
+VarDecl ::= NameList:names COLON Type:type SEMICOLON
+          {:
+            for (int i = 0; i < names.size(); i++)
+            {
+                String name = (String)names.get(i);
+                parser.symbolTable.addVar(name, type);
+            }
+          :};
+
+NameList ::= NameList:arr COMMA ID:name
+           {:
+             RESULT = arr;
+             RESULT.add(name);
+           :}
+           | ID:name
+           {:
+             RESULT = new ArrayList();
+             RESULT.add(name);
+           :};
+           
+Type ::= INT
+       {:
+         RESULT = parser.symbolTable.getType("int");
+       :}
+       | CHAR
+       {:
+         RESULT = parser.symbolTable.getType("char");
+       :}
+       | REAL
+       {:
+         RESULT = parser.symbolTable.getType("real");
+       :}       
+       | BOOL
+       {:
+         RESULT = parser.symbolTable.getType("bool");
+       :};
+       
+StatementList ::= StatementList:stl Statement:st
+                {:
+                  RESULT = stl;
+                  RESULT.addStatement(st);
+                :}
+                | Statement:st
+                {:
+                  RESULT = new BlockNode();
+                  RESULT.addStatement(st);
+                :};
+                
+Statement ::= Loop:loop
+            {:
+              RESULT = loop;
+            :}
+            | ID:name ASSIGN Expression:expr SEMICOLON
+            {:
+              VarNode var = parser.symbolTable.getVar(name);
+              RESULT = new AssignNode(var, expr);
+            :}
+            | Block:block
+            {:
+              RESULT = block;
+            :};
+            
+Loop ::= WHILE LPAR Expression:expr RPAR Statement:st
+       {:
+         RESULT = new WhileStatementNode(expr, st);
+       :};
+       
+Expression ::= Expression:expr1 OR AndExpression:expr2
+             {:
+               RESULT = new LogicalOrNode(expr1, expr2);
+             :}
+             | AndExpression:expr
+             {:
+               RESULT = expr;
+             :};
+             
+AndExpression ::= AndExpression:expr1 AND RelExpression:expr2
+                {:
+                  RESULT = new LogicalAndNode(expr1, expr2);
+                :}
+                | RelExpression:expr
+                {:
+                  RESULT = expr;
+                :};
+                
+RelExpression ::= ArExpression:expr1 RelOp:relop ArExpression:expr2
+                {:
+                  RESULT = new RelOpNode(expr1, expr2, relop);
+                :}
+                | ArExpression:expr
+                {:
+                  RESULT = expr;
+                :};
+                
+RelOp ::= LT
+        {:
+            RESULT = "Compare_Less";
+        :}
+        | EQ
+        {:
+            RESULT = "Compare_Equal";
+        :}
+        | GT
+        {:
+            RESULT = "Compare_Greater";
+        :};
+        
+ArExpression ::= ArExpression:expr1 PLUS Term:expr2
+               {:
+                 RESULT = new AdditionNode(expr1, expr2);
+               :}
+               | ArExpression:expr1 MINUS Term:expr2
+               {:
+                 RESULT = new SubtractionNode(expr1, expr2);
+               :}
+               | Term:expr
+               {:
+                 RESULT = expr;
+               :};
+            
+Term ::= Term:expr1 ASTER Factor:expr2
+       {:
+         RESULT = new MultiplicationNode(expr1, expr2);
+       :}
+       | Term:expr1 FSLASH Factor:expr2
+       {:
+         RESULT = new DivisionNode(expr1, expr2);
+       :}
+       | Factor:expr
+       {:
+         RESULT = expr;
+       :};
+            
+Factor ::= ID:name
+         {:
+           VarNode var = parser.symbolTable.getVar(name);
+           RESULT = new VarExprNode(var);
+         :}
+         | Constant:con
+         {:
+           RESULT = new ConstExprNode(con);
+         :}
+         | LPAR Expression:expr RPAR
+         {:
+           RESULT = expr;
+         :};
+         
+Constant ::= INTCONST:c
+           {:
+             RESULT = new ConstNode(parser.symbolTable.getType("int"), c);
+           :}
+           | BOOLCONST:c
+           {:
+             RESULT = new ConstNode(parser.symbolTable.getType("bool"), c);
+           :}
+           | REALCONST:c
+           {:
+             RESULT = new ConstNode(parser.symbolTable.getType("real"), c);
+           :}
+           | CHARCONST:c
+           {:
+             RESULT = new ConstNode(parser.symbolTable.getType("char"), c);
+           :};
+
+
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+
+

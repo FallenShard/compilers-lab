@@ -1,21 +1,19 @@
 main()
 {
-    a, b, sum : int;
+    a, b, sum : int; 
     c : real;
     control : bool;
 
     a = 2;
     b = 3;
     sum = a + b;
-
+    
     c = 0.23;
 
     control = true;
 
     while (control == true)
     {
-        x : int;
-        x = 1;
         sum = a / b;
         a = a * b;
         b = b - a;

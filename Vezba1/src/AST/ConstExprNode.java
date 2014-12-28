@@ -18,13 +18,19 @@ public class ConstExprNode extends ExprNode
     @Override
 	public void translate(BufferedWriter out) throws IOException
 	{
-		result = targetConst.value.toString();
+        if (targetConst.value instanceof Boolean)
+        {
+            boolean b = (Boolean)targetConst.value;
+            result = b ? "1" : "0";
+        }
+        else
+            result = targetConst.value.toString();
 	}
 	
     @Override
 	protected void genLoad(String reg, BufferedWriter out) throws IOException
 	{
-		out.write("\tLoad_Const\t" + reg + ", " + result);
+        out.write(String.format("\t%-15s %s, %s" , "Load_Const", reg, result));
 		out.newLine();
 	}
 }

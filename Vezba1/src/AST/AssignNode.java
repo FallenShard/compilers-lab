@@ -21,7 +21,7 @@ public class AssignNode extends StatementNode
 	{
 		right.translate(out);
 		right.genLoad("R1", out);
-		out.write("\tStore\t\tR1, " + left.name);
+        out.write(String.format("\t%-15s %s, %s" , "Store", "R1", left.name));
 		out.newLine();
 	}
 }

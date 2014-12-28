@@ -2,6 +2,28 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/AssignNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/LogicalOrNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/SubtractionNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/Parser/MyParser.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/WhileStatementNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/StatementNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/RelOpNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/ASTNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/BinaryExprNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/Parser/myInput.ic</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/DivisionNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/LogicalAndNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/ConstExprNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/MultiplicationNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/Parser/MyParser5.cup</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/Parser/myInput.txt</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/AdditionNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/BlockNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/ExprNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/AST/VarExprNode.java</file>
+            <file>file:/D:/Version%20Control/compilers-lab-1/Vezba1/src/SymbolTable/ConstNode.java</file>
+        </group>
     </open-files>
 </project-private>
